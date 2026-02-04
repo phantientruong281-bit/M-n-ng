@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Snake Game</title>
+<title>Snake Mobile</title>
 
 <style>
 body{
@@ -15,63 +14,62 @@ body{
  overflow:hidden;
 }
 
-h2{color:#00ff99;margin:8px;}
-#score{font-size:22px;}
+h2{color:#00ff99;margin:6px;}
+#score{font-size:20px;}
 
 canvas{
  background:#000;
  border-radius:16px;
- box-shadow:0 0 25px #00ff99;
+ box-shadow:0 0 20px #00ff99;
  display:block;
- margin:10px auto;
+ margin:6px auto;
 }
 
 #controls{
  position:fixed;
- bottom:20px;
+ bottom:8px;
  width:100%;
 }
 
 #controls button{
- font-size:32px;
- margin:6px;
- padding:18px 24px;
- border-radius:18px;
+ font-size:44px;
+ margin:8px;
+ padding:26px 34px;
+ border-radius:22px;
  border:none;
  background:#00c853;
  color:white;
 }
 
-#controls button:active{background:#009624;}
+#controls button:active{
+ background:#009624;
+}
 
 #gameOver{
  position:fixed;
- top:0;
- left:0;
- width:100%;
- height:100%;
+ inset:0;
  background:rgba(0,0,0,0.85);
  display:none;
  flex-direction:column;
- align-items:center;
  justify-content:center;
- font-size:42px;
+ align-items:center;
+ font-size:38px;
 }
 
 #gameOver button{
  background:#ff5252;
  border:none;
- padding:18px 36px;
+ padding:18px 34px;
  border-radius:20px;
- font-size:26px;
- color:white;
+ font-size:24px;
  margin-top:20px;
+ color:white;
 }
 </style>
 </head>
 
 <body>
-<h2>🐍 Rắn là bn,ko phải tôi</h2>
+<h2>🐍 Rắn là bạn,ko phải tôi</h2>
 <div id="score">Điểm: 0</div>
 <canvas id="game"></canvas>
 
@@ -96,24 +94,24 @@ const c=document.getElementById("game");
 const ctx=c.getContext("2d");
 
 function resize(){
- c.width=window.innerWidth;
- c.height=window.innerHeight-220;
+ c.width = window.innerWidth - 10;
+ c.height = window.innerHeight - 260;
 }
 resize();
-window.onresize=resize;
+window.onresize = resize;
 
-let size=20;
-let snake=[{x:100,y:100}];
-let food=randomFood();
-let dir=null;
-let game=null;
-let score=0;
+let size = 20;
+let snake = [{x:100,y:100}];
+let food = randomFood();
+let dir = null;
+let game = null;
+let score = 0;
 
 function randomFood(){
- return{
+ return {
   x:Math.floor(Math.random()*(c.width/size))*size,
   y:Math.floor(Math.random()*(c.height/size))*size
- }
+ };
 }
 
 function start(){
@@ -154,7 +152,7 @@ function loop(){
   eat.play();
 
   food=randomFood();
- }else snake.pop();
+ } else snake.pop();
 
  ctx.clearRect(0,0,c.width,c.height);
 
@@ -189,3 +187,4 @@ function restart(){
 </script>
 </body>
 </html>
+
