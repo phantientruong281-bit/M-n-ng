@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Snake Game Pro</title>
+<style>
+body{
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:white;
+    font-family:Arial;
+    text-align:center;
+}
+#game{
+    background:black;
+    border-radius:15px;
+    box-shadow:0 0 20px #00ff99;
+    display:block;
+    margin:auto;
+}
+#score{
+    font-size:22px;
+    margin:10px;
+}
+.controls{
+    margin-top:15px;
+}
+.controls button{
+    width:65px;
+    height:65px;
+    font-size:30px;
+    border:none;
+    border-radius:15px;
+    background:#00ff99;
+    margin:5px;
+}
+.controls button:active{
+    transform:scale(0.9);
+}
+.restart{
+    margin-top:10px;
+    padding:10px 20px;
+    font-size:18px;
+    border:none;
+    border-radius:12px;
+    background:#ffd166;
+}
+</style>
+</head>
+
+<body>
+<h1>🐍Rắn là bạn,ko phải tôi</h1>
+<div id="score">Điểm: 0</div>
+
+<canvas id="game" width="400" height="400"></canvas>
+
+<div class="controls">
+    <div>
+        <button onclick="setDir('UP')">⬆</button>
+    </div>
+    <div>
+        <button onclick="setDir('LEFT')">⬅</button>
+        <button onclick="setDir('DOWN')">⬇</button>
+        <button onclick="setDir('RIGHT')">➡</button>
+    </div>
+</div>
+
+<button class="restart" onclick="restart()">🔁 Chơi lại</button>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const box = 20;
+
+let snake, food, dir, score, loop;
+
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+const audioCtx = new AudioCtx();
+
+function beep(f){
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.connect(g);
+    g.connect(audioCtx.destination);
+    o.frequency.value = f;
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.15);
+    o.stop(audioCtx.currentTime + 0.15);
+}
+
+function randomFood(){
+    return {
+        x: Math.floor(Math.random()*19)*box,
+        y: Math.floor(Math.random()*19)*box
+    }
+}
+
+function start(){
+    snake=[{x:9*box,y:10*box}];
+    food=randomFood();
+    dir="";
+    score=0;
+    document.getElementById("score").innerText="Điểm: 0";
+    clearInterval(loop);
+    loop=setInterval(draw,120);
+}
+
+function restart(){ start(); }
+
+function setDir(d){
+    if(d==="LEFT" && dir!=="RIGHT") dir=d;
+    if(d==="RIGHT" && dir!=="LEFT") dir=d;
+    if(d==="UP" && dir!=="DOWN") dir=d;
+    if(d==="DOWN" && dir!=="UP") dir=d;
+}
+
+document.addEventListener("keydown", e=>{
+    if(e.key==="ArrowLeft") setDir("LEFT");
+    if(e.key==="ArrowRight") setDir("RIGHT");
+    if(e.key==="ArrowUp") setDir("UP");
+    if(e.key==="ArrowDown") setDir("DOWN");
+});
+
+function draw(){
+    ctx.fillStyle="black";
+    ctx.fillRect(0,0,400,400);
+
+    for(let i=0;i<snake.length;i++){
+        ctx.fillStyle = i===0 ? "#00ff99" : "#00cc66";
+        ctx.fillRect(snake[i].x, snake[i].y, box, box);
+    }
+
+    ctx.fillStyle="red";
+    ctx.fillRect(food.x, food.y, box, box);
+
+    let headX = snake[0].x;
+    let headY = snake[0].y;
+
+    if(dir==="LEFT") headX -= box;
+    if(dir==="RIGHT") headX += box;
+    if(dir==="UP") headY -= box;
+    if(dir==="DOWN") headY += box;
+
+    if(headX===food.x && headY===food.y){
+        score++;
+        beep(700);
+        document.getElementById("score").innerText="Điểm: "+score;
+        food=randomFood();
+    } else {
+        snake.pop();
+    }
+
+    if(headX<0||headY<0||headX>=400||headY>=400){
+        beep(200);
+        clearInterval(loop);
+        alert("Game Over! Điểm: "+score);
+    }
+
+    snake.unshift({x:headX,y:headY});
+}
+
+start();
+</script>
+</body>
+</html>
