@@ -2,173 +2,170 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Snake Game</title>
+<title>Mơ nàng</title>
 
 <style>
 body{
- margin:0;
- background:#111827;
- color:white;
- font-family:sans-serif;
- text-align:center;
+  margin:0;
+  background:black;
+  color:white;
+  font-size:64px;
+  font-family:Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  overflow:hidden;
+  text-align:center;
 }
 
-h1{margin:10px}
+#lyric{
+  z-index:5;
+  max-width:85%;
+  line-height:1.3;
+}
 
+/* sao lấp lánh */
+.star{
+  position:absolute;
+  width:2px;
+  height:2px;
+  background:white;
+  opacity:.2;
+  animation: twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle{
+  from{opacity:.1;}
+  to{opacity:.9;}
+}
+
+/* pháo hoa */
 canvas{
- background:#020617;
- border:2px solid #38bdf8;
+  position:absolute;
+  top:0;
+  left:0;
+  z-index:1;
+  pointer-events:none;
 }
-
-.controls{
- margin-top:14px;
- display:grid;
- grid-template-columns:80px 80px 80px;
- grid-template-rows:80px 80px 80px;
- gap:6px;
- justify-content:center;
-}
-
-.controls button{
- width:80px;
- height:80px;
- font-size:36px;
- font-weight:bold;
- border-radius:6px;
- background:#6b7280;
- color:white;
- border:3px solid #374151;
- display:flex;
- align-items:center;
- justify-content:center;
- box-shadow:0 4px #111827;
-}
-
-.controls button:active{
- transform:translateY(4px);
- box-shadow:0 0 #111827;
-}
-
-#over{
- position:fixed;
- inset:0;
- background:rgba(0,0,0,.7);
- display:none;
- align-items:center;
- justify-content:center;
- flex-direction:column;
-}
-
-#over button{
- margin-top:15px;
- font-size:22px;
- padding:12px 26px;
-}
-
 </style>
 </head>
-
 <body>
 
-<h1>🐍Rắn là bn,ko phải tôi</h1>
-<canvas id="game"></canvas>
+<audio src="nhac.mp3" autoplay loop></audio>
 
-<div class="controls">
-  <div></div>
-  <button onclick="setDir(0,-1)">▲</button>
-  <div></div>
-
-  <button onclick="setDir(-1,0)">◀</button>
-  <div></div>
-  <button onclick="setDir(1,0)">▶</button>
-
-  <div></div>
-  <button onclick="setDir(0,1)">▼</button>
-  <div></div>
-</div>
-
-<div id="over">
-<h2>Thua rồi kìa gà quá-))</h2>
-<button onclick="start()">Chơi lại</button>
-</div>
-
-<audio id="eat" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
-<audio id="dead" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<div id="lyric"></div>
 
 <script>
-const c=document.getElementById("game");
-const ctx=c.getContext("2d");
-const eat=document.getElementById("eat");
-const dead=document.getElementById("dead");
+// ===== SAO LẤP LÁNH NHẸ =====
+for(let i=0;i<120;i++){
+ let s=document.createElement("div");
+ s.className="star";
+ s.style.left=Math.random()*100+"vw";
+ s.style.top=Math.random()*100+"vh";
+ s.style.animationDuration=(1+Math.random()*3)+"s";
+ document.body.appendChild(s);
+}
 
-let size=12;
-let snake,food,dx,dy,over=false;
+// ===== PHÁO HOA MÀU =====
+const canvas=document.createElement("canvas");
+const ctx=canvas.getContext("2d");
+document.body.appendChild(canvas);
 
 function resize(){
- let side=Math.min(window.innerWidth-20, window.innerHeight-260);
- c.width=Math.floor(side/size)*size;
- c.height=c.width;
+ canvas.width=window.innerWidth;
+ canvas.height=window.innerHeight;
 }
-window.onresize=resize;
 resize();
+window.onresize=resize;
 
-function rand(){
- return {
-  x:Math.floor(Math.random()*(c.width/size))*size,
-  y:Math.floor(Math.random()*(c.height/size))*size
+const colors=["red","yellow","cyan","lime","magenta","orange"];
+let particles=[];
+
+function boom(){
+ let x=Math.random()*canvas.width;
+ let y=Math.random()*canvas.height/2;
+ let color=colors[Math.floor(Math.random()*colors.length)];
+
+ for(let i=0;i<60;i++){
+  particles.push({
+    x,y,
+    vx:(Math.random()-0.5)*8,
+    vy:(Math.random()-0.5)*8,
+    life:80,
+    color
+  });
  }
 }
 
-function start(){
- snake=[{x:size*4,y:size*4}];
- dx=size; dy=0;
- food=rand();
- over=false;
- document.getElementById("over").style.display="none";
+function animate(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+
+ if(Math.random()<0.04) boom();
+
+ particles.forEach((p,i)=>{
+   p.x+=p.vx;
+   p.y+=p.vy;
+   p.life--;
+
+   ctx.beginPath();
+   ctx.arc(p.x,p.y,3,0,Math.PI*2);
+   ctx.fillStyle=p.color;
+   ctx.fill();
+
+   if(p.life<=0) particles.splice(i,1);
+ });
+
+ requestAnimationFrame(animate);
 }
-start();
+animate();
 
-function setDir(x,y){
- if(over) return;
- if(dx===-x*size && dy===-y*size) return;
- dx=x*size;
- dy=y*size;
-}
+// ===== LYRIC (NHƯ CŨ - KHÔNG LỖI) =====
+const lyrics=[
+"Trong không gian đầy tối tăm",
+"Gặp đc em như cách đang bốc thăm",
+"Anh lăng nhăng đầy tiếng tăm",
+"Nhưng cơn say em mang như thiên đàng",
+"Còn vội gì mà không tới",
+"Tình yêu này chẳng cần biên giới",
+"Từng ngày chỉ cần cười phơi phới",
+"Có vui có buồn, có trông có chờ",
+"Có những góc phố luôn muốn mình qua",
+"Trên con xe wave ta hát lời ca",
+"Băng băng đi theo a ship giỏ hoa",
+"Ôm nhau giữ ấm trong tiếng còi xa",
+"Em xinh như hoa giữa nắng ban mai",
+"Dịu dàng đón lấy ánh sáng chiếu nát tim ai",
+"Mặc kệ những phán xét có đến trước hôm mai",
+"Thì tình anh trao em nghìn năm không phai"
+];
 
-function hit(h){
- return snake.some((p,i)=>i&&p.x===h.x&&p.y===h.y);
-}
+const speed=200;
+const box=document.getElementById("lyric");
 
-function loop(){
- if(over) return;
+let i=0,j=0,text="";
 
- let h={x:snake[0].x+dx,y:snake[0].y+dy};
+function play(){
+ if(i>=lyrics.length) return;
 
- if(h.x<0||h.y<0||h.x>=c.width||h.y>=c.height||hit(h)){
-  over=true;
-  dead.play();
-  document.getElementById("over").style.display="flex";
-  return;
+ let words=lyrics[i].split(" ");
+ text+=words[j]+" ";
+ box.innerText=text;
+
+ j++;
+
+ if(j>=words.length){
+  text="";
+  j=0;
+  i++;
+  setTimeout(play,700);
+ }else{
+  setTimeout(play,speed);
  }
-
- snake.unshift(h);
-
- if(h.x===food.x&&h.y===food.y){
-  eat.play();
-  food=rand();
- } else snake.pop();
-
- ctx.clearRect(0,0,c.width,c.height);
-
- ctx.fillStyle="#22c55e";
- snake.forEach(p=>ctx.fillRect(p.x,p.y,size,size));
-
- ctx.fillStyle="#f97316";
- ctx.fillRect(food.x,food.y,size,size);
 }
 
-setInterval(loop,120);
+play();
 </script>
+
 </body>
 </html>
